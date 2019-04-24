@@ -2,9 +2,7 @@
 
 ## Welcome to bunq!
 
-{% hint style="info" %}
-_We have updated the sandbox base url to_ [_https://public-api.sandbox.bunq.com/v1/_](https://public-api.sandbox.bunq.com/v1/)_. Please update your applications accordingly. Check_ [_here_](https://github.com/bunq/sdk_php/issues/149) _for more info._
-{% endhint %}
+The bunq API is based on the RESTful principles. It returns responses in the JSON format. The only exclusion is binary \(image\) files.
 
 {% hint style="info" %}
 _**PSD2 NOTICE:** The second Payment Services Directive \(PSD2\) may affect your current or planned usage of our public API, as some of the API services are now subject to a permit. Please be aware that using our public API without the required PSD2 permit is at your own risk. Take notice of our_ [_updated API Terms and Conditions_](https://www.bunq.com/legal) _for more information._
@@ -13,9 +11,13 @@ _**PSD2 NOTICE:** The second Payment Services Directive \(PSD2\) may affect your
 ## Getting Started
 
 1. **Create a user account with your phone.** Afterwards, you can use this account to create an API key from which you can make API calls. You can find API key management under _Profile → Security & Settings → Developers → API keys_.
-2. **Register a device.** A device can be a phone \(private\), computer or a server \(public\). You can register a new device by using the installation and device-server calls.
-3. **Open a session.** Sessions are temporary and expire after the same amount of time you have set for auto logout in your user account.
+2. **Register a device.** A device can be a phone \(private\), computer or a server \(public\). You can register a new device by using the _installation_ and _device-server_ calls.
+3. **Open a session.** Sessions are temporary and expire in the same amount of time you have set for auto logout in your user account.
 4. **Make your first call!**
+
+{% hint style="info" %}
+Looking to start with the sandbox environment first? Jump to the [Sandbox page](https://lexy.gitbook.io/bunq/basics/sandbox).
+{% endhint %}
 
 ## Versioning
 
