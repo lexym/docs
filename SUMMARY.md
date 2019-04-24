@@ -12,11 +12,11 @@
 * [API Conventions](basics/api-conventions.md)
 * [Callbacks](basics/callbacks.md)
 * [Pagination](basics/pagination.md)
+* [Sandbox](basics/sandbox/README.md)
+  * [Android Emulator](basics/sandbox/android-emulator.md)
 * [Moving to Production](basics/moving-to-production.md)
-* [Android Emulator](basics/android-emulator.md)
 * [API reference](https://doc.bunq.com/#/amount-used)
 * [Release notes](basics/release-notes.md)
-* [Sandbox money](basics/sandbox-money.md)
 
 ## Quickstart
 
