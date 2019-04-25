@@ -1,20 +1,38 @@
 # Authentication
 
-* We use encryption for all API calls. This means that all requests must use HTTPS. The HTTP standard calls will fail. You should also use SSL Certificate Pinning and Hostname Verification to ensure a secure connection with bunq.
-* In order to make API calls you need to register a device and open a session.
-* We use RSA Keys for signatures headers and encryption.
-* API calls must contain a valid authentication token in the headers.
-* The auto logout time that you've set for your user account is also effective for your sessions. If a request is made 30 minutes before a session expires, the session will automatically be extended.
+Here is what you need to know about how the bunq authentication works:
 
-## Device Registration
+* We use encryption for all API calls. This means that all requests must use HTTPS. The HTTP  calls will fail. 
+* Use SSL Certificate Pinning and Hostname Verification to ensure your connection with bunq is secure.
+* To make API calls, you need to register a device and open a session.
+* API calls must contain a valid authentication token in the headers.
+* The auto logout time that you set applies to all your sessions. If a request is made 30 minutes before a session expires, the session will automatically be extended.
+
+{% hint style="info" %}
+We use [asymmetric cryptography](https://en.wikipedia.org/wiki/Public-key_cryptography) for signing requests and encryption.
+
+The client _\(you\)_ and the server _\(bunq\)_ must have a pair of keys: a private key and a public key. You need to pre-generate your own pair of 2048-bit [RSA keys](https://en.wikipedia.org/wiki/RSA_%28cryptosystem%29) in the [PEM format](https://en.wikipedia.org/wiki/Privacy-Enhanced_Mail).
+
+The parties _\(you and bunq\)_ exchange their public keys in the first step of the API context creation flow. All the following requests must be signed by both your application and the server. Pass your signature in the _X-Bunq-Client-Signature_ header, and the server will return its signature in the _X-Bunq-Server-Signature_ header.
+{% endhint %}
+
+## Creating API Context 
+
+Before you can start calling the bunq API, you must do the following:
+
+* register your API key and IP address\(es\);
+* register your device;
+* create a session. 
+
+We call this intro "creating an API context". There are a couple of ways to carry out the sequence of steps listed in the :
 
 #### Using our SDKs
 
-1. In order to start making calls with the bunq API, you must first register your API key and device and create a session.
-2. In the SDKs, we group these actions and call it "creating an API context".
-3. You can find more information on our [GitHub](https://github.com/bunq) page.
+1. Go to our [GitHub](https://github.com/bunq) page.
+2. Choose the SDK in your language of choice.
+3. Find the part dedicated to creating an API context.
 
-#### Using our API
+#### Using our API directly
 
 1. Create an _Installation_ with the installation POST call and provide a new public key. After doing so you receive an authentication token which you can use for the API calls in the next steps.
 2. Create a _DeviceServer_ with the device-server POST call and provide a description and API key.
