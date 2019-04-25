@@ -6,7 +6,7 @@ We do not use real money and do not allow external transactions in the sandbox e
 
 ## Sandbox API keys
 
-There 4 ways to generate a bunq sandbox API key:
+There are 4 ways to generate a bunq sandbox API key:
 
 1. create it from the [sandbox app](https://lexy.gitbook.io/bunq/basics/sandbox/android-emulator)
 2. [connect to Tinker](https://lexy.gitbook.io/bunq/quickstart/tinker) _\(it will auto connect you to the sandbox\)_

@@ -1,23 +1,28 @@
 # Tab payment
 
-You will create a tab that can be paid once by a single user, a so called TagUsageSingle, and explore three different ways to make the Tab visible to your customers:
+{% hint style="info" %}
+A **tab payment** is a payment made from a browser tab. 
+{% endhint %}
+
+This tutorial will help you create a tab that can be paid once by a single user \(a so-called TagUsageSingle\). It explains two ways to make the Tab visible to your customers:
 
 * QR code from the CashRegister
 * QR code from the Tab.
 
 ### Before you start
 
-Make sure that you have opened a session and that for any call you make after that, you pass the session’s token in the `X-Bunq-Client-Authentication` header.
+* [ ] Opened a session 
+* [ ] Pass the session _Token_ in the `X-Bunq-Client-Authentication` header in every following request of this session.
 
 ## Call Sequence
 
-### 1. POST attachment-public
+### 1. POST /attachment-public
 
 Start by creating an attachment that will be used for the avatar for the cash register.
 
 #### **Header**
 
-Make sure you set the `Content-Type` header to match the MIME type of the image. It is also required you pass a description of the image via the `X-Bunq-Attachment-Description` header.
+* Make sure you set the `Content-Type` header to match the MIME type of the image. It is also required you pass a description of the image via the `X-Bunq-Attachment-Description` header.
 
 #### **Body**
 
