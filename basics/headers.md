@@ -1,8 +1,8 @@
 # Headers
 
-HTTP headers allow your client and bunq to pass on additional information along with the request or response.
+HTTP headers allow your client and bunq to pass additional information along with the request or response.
 
-While this is already implemented in our [SDKs](https://github.com/bunq), please follow these instructions to make sure you set appropriate headers for calls if using bunq API directly.
+Though headers are already implemented in our [SDKs](https://github.com/bunq), we recommend that you follow these instructions to make sure you set appropriate headers when calling the bunq API directly.
 
 ## Request Headers
 

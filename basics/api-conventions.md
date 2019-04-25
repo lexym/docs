@@ -1,12 +1,12 @@
 # API Conventions
 
-Make sure to follow these indications when using the bunq API or get started with our SDKs.
+Make sure to follow these indications when using the bunq API. Alternatively, use one of our SDKs to get started.
 
 ### Responses
 
-All JSON responses have one top level object. In this object will be a Response field of which the value is always an array, even for responses that only contain one object.
+All JSON responses have one top level object. This object contains a Response field the value of which is always an array. This also applies to responses that contain only one object.
 
-Example response body:
+**Example** **response** **body structure:**
 
 ```text
 {
@@ -21,11 +21,12 @@ Example response body:
 ### Errors
 
 * Error responses also have one top level Error object.
-* The contents of the array will be a JSON object with an error\_description and error\_description\_translated field.
-* The error\_description is an English text indicating the error and the error\_description\_translated field can be shown to end users and is translated into the language from the X-Bunq-Language header, defaulting to en\_US.
-* When using bunq SDKs, error responses will be always raised in form of an exception.
+* The contents of the array is a JSON object with the _error\_description_ and _error\_description\_translated_ fields.
+* The _error\_description_ field contains the error explanation in the English language
+* The _error\_description\_translated_ field can be shown to the end users. It is automatically translated into the language specified in the `X-Bunq-Language` header. The default language is en\_US.
+* If you are using one of the bunq SDKs, error responses will be always raised in form of an exception.
 
-Example response body
+**Example response body:**
 
 ```text
 {
@@ -40,9 +41,9 @@ Example response body
 
 ### Object Type Indications
 
-When the API returns different types of objects for the same field, they will be nested in another JSON object that includes a specific field for each one of them. Within bunq SDKs a BunqResponse object will be returned as the top level object.
+If the API returns different types of objects for the same field, they are nested in a group JSON object that, in its turn,  contains a separate field for each of the objects. If you use one of the bunq SDKs, a BunqResponse object will be returned as the top level object.
 
-In this example there is a field content, which can have multiple types of objects as value such as — in this case — ChatMessageContentText. Be sure to follow this convention or use bunq SDKs instead.
+**Example.** The _content_ field can contain multiple types of objects such as ChatMessageContentText in this case. Be sure to follow this convention or use one of the bunq SDKs instead.
 
 ```text
 {
@@ -56,6 +57,8 @@ In this example there is a field content, which can have multiple types of objec
 
 ### Time Formats
 
-Times and dates being sent to and from the API are in UTC. The format that should be used is `YYYY-MM-DD hh:mm:ss.ssssss`, where the letters have the meaning as specified in ISO 8601. For example: `2017-01-13 13:19:16.215235`.  
+We use the UTC date and time standard and so expect you to use this format `YYYY-MM-DD hh:mm:ss.ssssss` . The meaning of the letters is defined in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601). 
+
+**Example:** `2017-01-13 13:19:16.215235`.  
 
 
