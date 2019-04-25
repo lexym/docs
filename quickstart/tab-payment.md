@@ -22,7 +22,8 @@ Start by creating an attachment that will be used for the avatar for the cash re
 
 #### **Header**
 
-* Make sure you set the `Content-Type` header to match the MIME type of the image. It is also required you pass a description of the image via the `X-Bunq-Attachment-Description` header.
+* [ ] Make sure you set the `Content-Type` header to match the MIME type of the image.
+* [ ] Pass a description of the image via the `X-Bunq-Attachment-Description` header.
 
 #### **Body**
 
@@ -30,11 +31,11 @@ The payload of this request is the binary representation of the image file. Do n
 
 #### **Response**
 
-Save the `uuid` of the posted attachment. You'll need it to create the avatar in the next step.
+* [ ] Save the `uuid` of the posted attachment. You'll need it to create the avatar in the next step.
 
-### 2. POST avatar
+### 2. POST /avatar
 
-Make an avatar using the public attachment you've just created.
+* [ ] Make an avatar using the public attachment you've just created.
 
 #### **Body**
 
@@ -42,19 +43,23 @@ The payload of this request is the `uuid` of the attachment public.
 
 #### **Response**
 
-In response, you’ll receive the UUID of the avatar created using the attachment. Save this UUID. You’ll use it as the avatar for the cash register you're about to create.
+* [ ] Receive the `UUID` of the avatar created using the Attachment object.
+* [ ] Save the `UUID`. You will use it as the avatar for the cash register you're about to create.
 
-### 3. LIST monetary-account
+### 3. GET /monetary-account
 
-Get a listing of all available monetary accounts. Choose one, and save the id of the monetary account you want your cash register to be connected to. Each paid tab for the cash register will transfer the money to this account.
+* [ ] List all your monetary accounts. 
+* [ ] Choose the one you want your cash register to be connected to and save its `id` . Each paid tab for the cash register will transfer the money to this account.
 
-### 4a. POST cash-register
+### 4a. POST /cash-register
 
-Create a cash register. Use the `id` of the monetary account you want to connect the cash register to in the URL of the request.
+* [ ] Create a cash register using the `id` of the monetary account you want to connect the cash register to in the URL of the request.
 
 #### **Body**
 
-In the body provide the `uuid` of the avatar you created for this cash register. Also make sure to provide a unique name for your cash register. Set the status to `PENDING_APPROVAL`.
+* Provide the `uuid` of the avatar you created for this cash register. 
+* Make sure to provide a unique name for your cash register. 
+* Change the status of the cash register to `PENDING_APPROVAL`.
 
 #### **Response**
 
@@ -62,33 +67,43 @@ The response contains the `id` of the cash register you created. Save this `id`.
 
 ### 4b. Wait for approval
 
-On the production environment, a bunq admin will review and approve your cash register. In the sandbox environment, your cash register will be automatically approved.
+* **Production:** a bunq admin will review and approve your cash register. 
+* **Sandbox:** your cash register will be automatically approved.
 
-### 5. POST tab-usage-single
+### 5. POST /tab-usage-single
 
-Create a new tab that is connected to your cash register. Use the id of the cash register you want to connect this tab to in the URL of your request.
+* [ ] Create a new tab that is connected to your cash register using the `id` of the cash register in the request URL request.
 
 #### **Body**
 
-Give the tab a name in `merchant_reference`. Create the tab with status `OPEN`, and give the tab a starting amount. You can update this amount later.
+* Give the tab a name in `merchant_reference`. 
+* Create the tab with the `OPEN` status and give the tab a starting amount. You can update this amount later.
 
 #### **Response**
 
-The response contains the uuid of the tab you created.
+The response contains the `uuid` of the tab you created.
 
-### 6. POST tab-item \(optional\)
+### 6. POST /tab-item \(optional\)
 
-You can add items to a tab. For instance, if a customer will be paying for multiple products via this tab, you can decide to add an item for each of these. Adding items to a tab is optional, and adding them will not change the total amount of the tab itself. However, if you've added any tab items the sum of the amounts of these items must be equal to the `total_amount` of the tab when you change its status to `WAITING_FOR_PAYMENT`.
+You can add items to a tab. This will display the products or services the customer is going to pay for. Adding items to a tab is does not change the total amount of the tab itself. 
 
-### 7. PUT tab-usage-single
+{% hint style="info" %}
+Make sure the sum of the item prices equals the `total_amount` of the tab when you change its status to `WAITING_FOR_PAYMENT`.
+{% endhint %}
 
-Update the status of the tab to `WAITING_FOR_PAYMENT` if you want the costumer to pay the tab, and you're done adding any tab items. You can use this request to make the tab visible for your costumers.
+### 7. PUT /tab-usage-single
+
+Once the tab is ready for a customer to pay for the order, update the status of the tab to `WAITING_FOR_PAYMENT`. This will make the tab visible to your costumers.
 
 #### **Visibility**
 
 To decide how you are going to make your tab visible, pass a visibility object in the payload.
 
-Setting `cash_register_qr_code` to true will connect this tab to the QR code from the cash register. If this cash register does not have a QR code yet, one will be created. Only one Tab can be connected to the cash register’s QR code at any given time.
+Set `cash_register_qr_code` _true_ to connect the tab to the QR code from the cash register. If this cash register does not have a QR code yet, it is created automatically. 
 
-Setting `tab_qr_code` to true will create a QR code specifically for this tab. This QR code can not be linked to anything else.
+{% hint style="info" %}
+Only one Tab can be connected to the QR code of the cash register at a time.
+{% endhint %}
+
+Set `tab_qr_code` _true_ to create a QR code specifically for the tab. The QR code can not be linked to anything else.
 
