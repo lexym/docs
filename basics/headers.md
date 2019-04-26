@@ -69,7 +69,12 @@ The signature header is included in all API requests except `POST /v1/installati
 
 `X-Bunq-Client-Authentication: 622749ac8b00c81719ad0c7d822d3552e8ff153e3447eabed1a6713993749440`
 
-The authentication token is used to authenticate the source of the API call. It is required by all API calls except for POST /v1/installation. It is important to note that the device and session calls are using the token from the response of the installation call, while all the other calls use the token from the response of the session-server call
+The authentication _Token_ is used to identify the sender of the API call. It is required for all API calls except `POST /v1/installation`. 
+
+{% hint style="info" %}
+* Pass the **installation** _**Token**_ ****you get in the response to the `POST /installation` call in the `/device-server` and `/session-server` calls.
+* Pass the **session** _**Token**_ you get in the response to the `POST /session-server` call in all the other calls.
+{% endhint %}
 
 ### Attachment headers
 
@@ -95,19 +100,22 @@ Use this header to provide a description of an attachment.
 
 `X-Bunq-Client-Request-Id: a4f0de`
 
-The same ID that was provided in the request's X-Bunq-Client-Request-Id header. Is included in the response \(and request\) signature, so can be used to ensure this is the response for the sent request.
+The header contains the same `id` that was provided in the `X-Bunq-Client-Request-Id` header of the request. It is included in the response \(and request\) signature so it can be used to ensure this is the response to _the_ request.
 
 #### **X-Bunq-Client-Response-Id**
 
 `X-Bunq-Client-Response-Id: 76cc7772-4b23-420a-9586-8721dcdde174`
 
-A unique ID for the response formatted as a UUID. Clients can use it to add extra protection against replay attacks.
+The header carries a unique `id`  of the response formatted as a `UUID`. You can use it to add extra protection against replay attacks.
 
 #### **X-Bunq-Server-Signature**
 
-`X-Bunq-Server-Signature: XBBwfDaOZJapvcBpAIBT1UOmczKqJXLSpX9ZWHsqXwrf1p+H+eON+TktYksAbmkSkI4gQghw1AUQSJh5i2c4+CTuKdZ4YuFT0suYG4sltiKnmtwODOFtu1IBGuE5XcfGEDDSFC+zqxypMi9gmTqjl1KI3WP2gnySRD6PBJCXfDxJnXwjRkk4kpG8Ng9nyxJiFG9vcHNrtRBj9ZXNdUAjxXZZFmtdhmJGDahGn2bIBWsCEudW3rBefycL1DlpJZw6yRLoDltxeBo7MjgROBpIeElh5qAz9vxUFLqIQC7EDONBGbSBjaXS0wWrq9s2MGuOi9kJxL2LQm/Olj2g==`
+```text
+X-Bunq-Server-Signature: 
+XBBwfDaOZJapvcBpAIBT1UOmczKqJXLSpX9ZWHsqXwrf1p+H+eON+TktYksAbmkSkI4gQghw1AUQSJh5i2c4+CTuKdZ4YuFT0suYG4sltiKnmtwODOFtu1IBGuE5XcfGEDDSFC+zqxypMi9gmTqjl1KI3WP2gnySRD6PBJCXfDxJnXwjRkk4kpG8Ng9nyxJiFG9vcHNrtRBj9ZXNdUAjxXZZFmtdhmJGDahGn2bIBWsCEudW3rBefycL1DlpJZw6yRLoDltxeBo7MjgROBpIeElh5qAz9vxUFLqIQC7EDONBGbSBjaXS0wWrq9s2MGuOi9kJxL2LQm/Olj2g==
+```
 
-The server's signature for this response. See the signing page for details on how to verify this signature.
+The header contains the signature of the bunq server for this response. See the [signing page](https://lexy.gitbook.io/bunq/basics/authentication/signing) for details on how to verify this signature.
 
 ### Warning header
 
@@ -115,6 +123,6 @@ The server's signature for this response. See the signing page for details on ho
 
 `X-Bunq-Warning: "You have a negative balance. Please check the app for more details."`
 
-Used to inform you on situations that might impact your bunq account and API access.  
+We use it to warn you something is impacting your bunq account and/or API access.  
 
 

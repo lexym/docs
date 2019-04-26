@@ -1,10 +1,18 @@
 # Signing
 
-To avoid modification of API call data while in transit \(i.e. man-in-the-middle attacks\), we use a request/response signing system. The signature ensures that the data is coming from the party that has the correct private key.
+We are legally required to protect our users and their data from malicious attacks and intrusions. That is why we use [asymmetric cryptography](https://en.wikipedia.org/wiki/Public-key_cryptography) for signing requests and encryption. The use of signatures ensures the data is coming from the trusted party and was not modified after sent and before received.
 
-While this system is already implemented in our SDKs, you should always follow the guidelines on this page when using the bunq API to make sure you correctly sign your calls.
+{% hint style="info" %}
+The client _\(you\)_ and the server _\(bunq\)_ must have a pair of keys: a private key and a public key. You need to pre-generate your own pair of 2048-bit [RSA keys](https://en.wikipedia.org/wiki/RSA_%28cryptosystem%29) in the [PEM format](https://en.wikipedia.org/wiki/Privacy-Enhanced_Mail).
 
-The signatures are created using the SHA256 cryptographic hash function and included \(encoded in base 64\) in the `X-Bunq-Client-Signature` request header and `X-Bunq-Server-Signature`response header. The data to sign is the following:
+The parties _\(you and bunq\)_ exchange their public keys in the first step of the [API context creation flow](https://lexy.gitbook.io/bunq/basics/authentication#creating-api-context). All the following requests must be signed by both your application and the server. Pass your signature in the _X-Bunq-Client-Signature_ header, and the server will return its signature in the _X-Bunq-Server-Signature_ header.
+{% endhint %}
+
+Though the signing mechanism is implemented in our [SDKs](https://github.com/bunq), we recommend that you follow these guidelines to make sure you sign your calls correctly when calling the bunq API directly.
+
+The signatures are created using the [SHA256](https://en.wikipedia.org/wiki/SHA-2) cryptographic hash function and are included \(already [encoded in Base64](https://en.wikipedia.org/wiki/Base64)\) in the `X-Bunq-Client-Signature` request header and the `X-Bunq-Server-Signature`response header. 
+
+Here is the data you need to sign:
 
 <table>
   <thead>
@@ -49,7 +57,7 @@ The signatures are created using the SHA256 cryptographic hash function and incl
 
 ## Request signing example
 
-Consider the following request, a `POST` to `/v1/user/126/monetary-account/222/payment` \(the JSON is formatted with newlines and indentations to make it more readable\):
+Let's call`POST /v1/user/126/monetary-account/222/payment`. Here is the request:
 
 | Header | Value |
 | :--- | :--- |
@@ -61,8 +69,6 @@ Consider the following request, a `POST` to `/v1/user/126/monetary-account/222/p
 | X-Bunq-Geolocation: | 0 0 0 0 NL |
 | X-Bunq-Language: | en\_US |
 | X-Bunq-Region: | en\_US |
-
-
 
 ```text
 {
@@ -78,7 +84,12 @@ Consider the following request, a `POST` to `/v1/user/126/monetary-account/222/p
 }
 ```
 
-Let's sign that request. First create a variable `$dataToSign`, starting with the type and endpoint url. Follow that by a list of headers only including `Cache-Control`, `User-Agent` and headers starting with `X-Bunq-`. Add an extra \(so double\) linefeed after the list of headers. Finally end with the body of the request:
+Let's sign the request. 
+
+* [ ] Create a `$dataToSign` variable starting with the type and endpoint URL. 
+* [ ] Follow that by a list of headers only including `Cache-Control`, `User-Agent` and the headers starting with `X-Bunq-`. 
+* [ ] Add an extra \(so double\) linefeed after the list of headers. 
+* [ ] End with the body of the request.
 
 `POST /v1/user/126/monetary-account/222/payment`
 
@@ -107,16 +118,22 @@ Let's sign that request. First create a variable `$dataToSign`, starting with th
 }
 ```
 
-Next, create the signature of `$dataToSign` using the SHA256 algorithm and the private key `$privateKey` of the Installation's key pair. In PHP, use the following to create a signature. The signature will be passed by reference into `$signature`.
+* [ ] Create the signature to include in `$dataToSign` using the SHA256 algorithm and your private key.
 
-`openssl_sign($dataToSign, $signature, $privateKey, OPENSSL_ALGO_SHA256);`
+Here is how to create a signature in PHP. The signature will be passed by reference into `$signature`.
 
-Encode the resulting `$signature` using base64, and add the resulting value to the request under the header `X-Bunq-Client-Signature`. You have now signed your request, and can send it!  
+```text
+openssl_sign($dataToSign, $signature, $privateKey, OPENSSL_ALGO_SHA256);
+```
+
+Encode the resulting `$signature` using Base64 and add the resulting value under the `X-Bunq-Client-Signature` header. 
+
+You have signed your request! Send it!  
 
 
 ## Response verifying example
 
-The response to the previous request is as follows \(the JSON is formatted with newlines and indentations to make it more readable\):
+We sent the request and have received this response:
 
 | Header | Value |
 | :--- | :--- |
@@ -143,7 +160,18 @@ The response to the previous request is as follows \(the JSON is formatted with 
 }
 ```
 
-Now we need to verify that this response actually came from the server and not from a man-in-the-middle. So, first we built the data that is to be verified, starting with the response code \(200\). Follow this by a list of the bunq headers \(sorted alphabetically and excluding the signature header itself\). Note: you should only include headers starting with X-Bunq-, so omit headers like Cache-Control for the verification of the response. Finally, add two line feeds followed by the response body. Note: The headers might change in transit from `X-Header-Capitalization-Style` to `x-header-non-capitalization-style`. Make sure you change them to `X-Header-Capitalization-Style` before verifying the response signature.
+We need to verify that this response was sent by the bunq server and not from a man-in-the-middle. 
+
+So, first we built the data that is to be verified, starting with the response code \(200\). Follow this by a list of the bunq headers \(sorted alphabetically and excluding the signature header itself\). 
+
+Note: 
+
+* [ ] Only include headers starting with `X-Bunq-`. 
+* [ ] Add two line feeds followed by the response body. 
+
+{% hint style="info" %}
+The headers might change in transit from `X-Header-Capitalization-Style` to `x-header-non-capitalization-style`. Make sure you change them to `X-Header-Capitalization-Style` before verifying the response signature.
+{% endhint %}
 
 ```text
 200
@@ -153,23 +181,27 @@ X-Bunq-Server-Response-Id: 89dcaa5c-fa55-4068-9822-3f87985d2268
 {"Response":[{"Id":{"id":1561}}]}
 ```
 
-Now, verify the signature of `$dataToVerify` using the SHA256 algorithm and the public key `$publicKey` of the server. In PHP, use the following to verify the signature.
+* [ ] Verify the signature of `$dataToVerify` using the SHA256 algorithm and the `$publicKey` of the server. 
 
-`openssl_sign($dataToVerify, $signature, $publicKey, OPENSSL_ALGO_SHA256);`
+Here is how you can verify the signature in PHP:
+
+```text
+openssl_sign($dataToVerify, $signature, $publicKey, OPENSSL_ALGO_SHA256);
+```
 
 ## Troubleshooting
 
 If you get this error `The request signature is invalid`, please check the following:
 
-* There are no redundant characters \(extra spaces, trailing line breaks, etc.\) in the data to sign.
-* In your data to sign, you have used only the endpoint URL, for instance POST /v1/user, and not the full url, for instance `POST https://sandbox.public.api.bunq.com/v1/user`
-* You only added the headers `Cache-Control`, `User-Agent` and headers starting with `X-Bunq-`.
-* In your data to sign, you have sorted the headers alphabetically by key, ascending.
-* There is a colon followed by a space `:` separating the header key and value in your data to sign.
-* There is an extra line break after the list of headers in the data to sign, regardless of whether there is a request body.
-* Make sure the body is appended to the data to sign exactly as you're adding it to the request.
-* In your data to sign, you have not added the `X-Bunq-Client-Signature` header to the list of headers \(that would also be impossible\).
-* You have added the full body to the data to sign.
-* You use the data to sign to create a SHA256 hash signature.
-* You have base64 encoded the SHA256 hash signature before adding it to the request under `X-Bunq-Client-Signature`.
+* [ ] There are no redundant characters _\(extra spaces, trailing line breaks, etc.\)_ in the data to sign.
+* [ ] In your data to sign, you have used only the endpoint URL \(`POST /v1/user`\) instead of the full URL \(`POST https://sandbox.public.api.bunq.com/v1/user`\).
+* [ ] You only added the `Cache-Control`, `User-Agent` and `X-Bunq-` headers.
+* [ ] You have sorted the headers alphabetically by key in the ascending order.
+* [ ] There is a colon followed by a space `:`. It separates the header key and value in your data to sign.
+* [ ] There is an extra line break after the list of headers in the data to sign, regardless of whether there is a request body.
+* [ ] Make sure the body is appended to the data to sign exactly as you are adding it to the request.
+* [ ] You have not added the `X-Bunq-Client-Signature` header to the list of headers.
+* [ ] You have added the full body to the data to sign.
+* [ ] You are using the data to sign to create a SHA256 hash signature.
+* [ ] You have Base64 encoded the SHA256 hash signature before adding it to the request under the `X-Bunq-Client-Signature` header.
 
