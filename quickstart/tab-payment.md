@@ -1,7 +1,7 @@
 # Tab payment
 
 {% hint style="info" %}
-A **tab payment** is a payment made from a browser tab. 
+A **tab payment** is a payment made via a browser or POS tab. 
 {% endhint %}
 
 This tutorial will help you create a tab that can be paid once by a single user \(a so-called TagUsageSingle\). It explains two ways to make the Tab visible to your customers:
@@ -11,7 +11,7 @@ This tutorial will help you create a tab that can be paid once by a single user 
 
 ### Before you start
 
-* [ ] Opened a session 
+* [ ] Open a session 
 * [ ] Pass the session _Token_ in the `X-Bunq-Client-Authentication` header in every following request of this session.
 
 ## Call Sequence
