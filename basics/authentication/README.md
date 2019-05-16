@@ -2,11 +2,8 @@
 
 Here is what you need to know about how the bunq authentication works:
 
-* We use encryption for all API calls. This means that all requests must use HTTPS. The HTTP  calls will fail. 
-* Use SSL Certificate Pinning and Hostname Verification to ensure your connection with bunq is secure.
-* To make API calls, you need to register a device and open a session.
-* API calls must contain a valid authentication token in the headers.
-* The auto logout time that you set applies to all your sessions. If a request is made 30 minutes before a session expires, the session will automatically be extended.
+* All requests must use HTTPS. HTTP calls will fail. 
+* We use extra signing on top of HTTPS encryption that you must implement yourself if you are not using the SDKs.
 
 {% hint style="info" %}
 We use [asymmetric cryptography](https://en.wikipedia.org/wiki/Public-key_cryptography) for signing requests and encryption.
@@ -15,6 +12,9 @@ The client _\(you\)_ and the server _\(bunq\)_ must have a pair of keys: a priva
 
 The parties _\(you and bunq\)_ exchange their public keys in the first step of the [API context creation flow](https://lexy.gitbook.io/bunq/basics/authentication#creating-api-context). All the following requests must be signed by both your application and the server. Pass your signature in the _X-Bunq-Client-Signature_ header, and the server will return its signature in the _X-Bunq-Server-Signature_ header.
 {% endhint %}
+
+* You should use SSL Certificate Pinning and Hostname Verification to ensure your connection with bunq is secure.
+* The auto logout time that you set in the app applies to all your sessions including the API ones. If a request is made 30 minutes before a session expires, the session will automatically be extended.
 
 ## Creating API Context 
 
@@ -32,6 +32,10 @@ We call this intro "creating an API context". There are a couple of ways to carr
 2. Choose the SDK in your language of choice.
 3. Find and use the part dedicated to creating an API context.
 
+{% hint style="info" %}
+[Run Tinker](https://lexy.gitbook.io/bunq/quickstart/tinker) to see a sample project using bunq SDK in action.
+{% endhint %}
+
 ### Using our API directly
 
 1. Create an _Installation_ by calling `POST v1/installation` and passing your pre-generated public key. You will receive an installation _Token._ Use it when making the two following API calls.
@@ -39,23 +43,20 @@ We call this intro "creating an API context". There are a couple of ways to carr
 3. Create a _SessionServer_ by executing `POST v1/session-server`. You will receive an authentication _Token._ Use it in the API requests in this active session.​
 
 {% hint style="info" %}
-[Use Postman](https://github.com/bunq/postman) to use our pre-setup API context creation calls.
+[Import our Postman collection](https://github.com/bunq/postman) to see our pre-setup API context creation calls. It will automatically generate and pre-fill everything in the API calls that create context so you can inspect the process.
 {% endhint %}
 
-### Using Tinker
+### Locking IP addresses that can use the API
 
-1. [Run a Tinker command](https://lexy.gitbook.io/bunq/quickstart/tinker).
-2. Find and reuse the code that creates an API context.
+When you create a context in `POST v1/device-server`, it ties the API key to your current IP address so it will not be useable from other IPs.
 
-### IP addresses
+If you have several IPs \(e. g. several servers\), you can set a list of allowed IPs in `device-server` request as an array. You must include your current IP in this array as to not lock yourself out.
 
-The DeviceServer and Installation you create in the first two steps of the API context creation flow, are bound to the IP address\(es\) you register them from. It is then only possible to add trusted IP addresses using the [IP endpoint](https://doc.bunq.com/#/ip/Create_Ip_for_User_CredentialPasswordIp).
+As a last resort, you can also [set a wildcard as an IP](https://together.bunq.com/d/1997-the-new-wildcard-api-key). In that case there will be no IP check for that API key. Please only do that if you have no other option.
 
-{% hint style="info" %}
-You can also use a [Wildcard API Key](https://together.bunq.com/d/1997-the-new-wildcard-api-key). It gives you the freedom to make API calls from any IP address after calling `POST v1/device-server`. 
+### Changing allowed IP addresses after initializing API key
 
-To switch to a Wildcard API Key, tap on _Allow All IP Addresses_ in the API Key menu in the bunq app. You can also do it programatically. Just pass your current IP and a `*` \(asterisk\) in the `permitted_ips` field of the `POST v1/device-server`call. 
+It is possible to add trusted IP addresses using the [IP endpoint](https://doc.bunq.com/#/ip/Create_Ip_for_User_CredentialPasswordIp). Obviously you need to make that request from an IP address that was allowed previously.
 
-**Example:**`["1.2.3.4", "*"]`
-{% endhint %}
+You will not be able to switch from concrete IPs to a wildcard IP after you've created a device-server. You can either request a new API key from the user or ask them to use _Allow all IP Addresses_ option in the app.
 
