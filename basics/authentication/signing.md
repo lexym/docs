@@ -1,14 +1,8 @@
 # Signing
 
-We are legally required to protect our users and their data from malicious attacks and intrusions. That is why we use [asymmetric cryptography](https://en.wikipedia.org/wiki/Public-key_cryptography) for signing requests and encryption. The use of signatures ensures the data is coming from the trusted party and was not modified after sent and before received.
+We are legally required to protect our users and their data from malicious attacks and intrusions. That is why we beyond having a secure https connection, we use [asymmetric cryptography](https://en.wikipedia.org/wiki/Public-key_cryptography) for signing requests and encryption. The use of signatures ensures the data is coming from the trusted party and was not modified after sending and before receiving.
 
-{% hint style="info" %}
-The client _\(you\)_ and the server _\(bunq\)_ must have a pair of keys: a private key and a public key. You need to pre-generate your own pair of 2048-bit [RSA keys](https://en.wikipedia.org/wiki/RSA_%28cryptosystem%29) in the [PEM format](https://en.wikipedia.org/wiki/Privacy-Enhanced_Mail).
-
-The parties _\(you and bunq\)_ exchange their public keys in the first step of the [API context creation flow](https://lexy.gitbook.io/bunq/basics/authentication#creating-api-context). All the following requests must be signed by both your application and the server. Pass your signature in the _X-Bunq-Client-Signature_ header, and the server will return its signature in the _X-Bunq-Server-Signature_ header.
-{% endhint %}
-
-Though the signing mechanism is implemented in our [SDKs](https://github.com/bunq), we recommend that you follow these guidelines to make sure you sign your calls correctly when calling the bunq API directly.
+The signing mechanism is implemented in our [SDKs](https://github.com/bunq) so if you are using them you don't have to worry about details described below.
 
 The signatures are created using the [SHA256](https://en.wikipedia.org/wiki/SHA-2) cryptographic hash function and are included \(already [encoded in Base64](https://en.wikipedia.org/wiki/Base64)\) in the `X-Bunq-Client-Signature` request header and the `X-Bunq-Server-Signature`response header. 
 
@@ -59,18 +53,15 @@ Here is the data you need to sign:
 
 Let's call`POST /v1/user/126/monetary-account/222/payment`. Here is the request:
 
-| Header | Value |
-| :--- | :--- |
-| Cache-Control:     | no-cache |
-| User-Agent: | bunq-TestServer/1.00 sandbox/0.17b3 |
-| X-Bunq-Client-Authentication: | f15f1bbe1feba25efb00802fa127042b54101c8ec0a524c36464f5bb143d3b8b |
-| X-Bunq-Client ****Request-Id: | 57061b04b67ef |
-| X-Bunq-Client-Signature: | UINaaJELGHekiye4JExGx6TCs2lKMta74oVlZlwVNuVD6xPpH7RS6H58C21MmiQ75/MSVjUePC8gBjtARW2HpUKN7hANJqo/UtDb7mgDMsuz7Cf/hKeUCX0T55w2X+NC3i1T+QOQVQ1gALBT1Eif6qgyyY1wpWJUYft0MmCGEYg/ao9r3g026DNlRmRpBVxXtyJiOUImuHbq/rWpoDZRQTfvGL4KH4iKV4Lcb+o9lw11xOl4LQvNOHq3EsrfnTIa5g80pg9TS6G0SvjWmFAXBmDXatqfVhImuKZtd1dQI12JNK/++isBsP79eNtK1F5rSksmsTfAeHMy7HbfAQSDbg== |
-| X-Bunq-Geolocation: | 0 0 0 0 NL |
-| X-Bunq-Language: | en\_US |
-| X-Bunq-Region: | en\_US |
-
 ```text
+cache-control: no-cache
+content-type: application/json
+x-bunq-geolocation: 0 0 0 0 NL
+x-bunq-client-authentication: f15f1bbe1feba25efb00802fa127042b54101c8ec0a524c36464f5bb143d3b8b
+x-bunq-client-request-id: 57061b04b67ef
+x-bunq-language: en_US
+x-bunq-region: en_US
+user-agent: bunq-TestServer/1.00 sandbox/0.17b3
 {
     "amount": {
         "value": "12.50",
@@ -86,25 +77,26 @@ Let's call`POST /v1/user/126/monetary-account/222/payment`. Here is the request:
 
 Let's sign the request. 
 
-* [ ] Create a `$dataToSign` variable starting with the type and endpoint URL. 
-* [ ] Follow that by a list of headers only including `Cache-Control`, `User-Agent` and the headers starting with `X-Bunq-`. 
+* [ ] Create a `$dataToSign` variable starting with the request verb and endpoint URL. 
+* [ ] On a new line follow that by a list of alphabetically-sorted headers only including `Cache-Control`, `User-Agent` and the headers starting with `X-Bunq-`. Convert to 
+
+  `X-Header-Capitalization-Style` from  `x-header-non-capitalization-style` if needed.
+
 * [ ] Add an extra \(so double\) linefeed after the list of headers. 
 * [ ] End with the body of the request.
 
-`POST /v1/user/126/monetary-account/222/payment`
-
-| Header | Value |
-| :--- | :--- |
-| Cache-Control: | no-cache |
-| User-Agent: | bunq-TestServer/1.00 sandbox/0.17b3 |
-| X-Bunq-Client-Authentication: | f15f1bbe1feba25efb00802fa127042b54101c8ec0a524c36464f5bb143d3b8b |
-| X-Bunq-Client-Request-Id: | 57061b04b67ef |
-| X-Bunq-Client-Signature: | UINaaJELGHekiye4JExGx6TCs2lKMta74oVlZlwVNuVD6xPpH7RS6H58C21MmiQ75/MSVjUePC8gBjtARW2HpUKN7hANJqo/UtDb7mgDMsuz7Cf/hKeUCX0T55w2X+NC3i1T+QOQVQ1gALBT1Eif6qgyyY1wpWJUYft0MmCGEYg/ao9r3g026DNlRmRpBVxXtyJiOUImuHbq/rWpoDZRQTfvGL4KH4iKV4Lcb+o9lw11xOl4LQvNOHq3EsrfnTIa5g80pg9TS6G0SvjWmFAXBmDXatqfVhImuKZtd1dQI12JNK/++isBsP79eNtK1F5rSksmsTfAeHMy7HbfAQSDbg== |
-| X-Bunq-Geolocation: | 0 0 0 0 NL |
-| X-Bunq-Language: | en\_US |
-| X-Bunq-Region: | en\_US |
+So for our example above the request to sign will look like this:
 
 ```text
+POST /v1/user/126/monetary-account/222/payment
+Cache-Control: no-cache
+User-Agent: bunq-TestServer/1.00 sandbox/0.17b3
+X-Bunq-Client-Authentication: f15f1bbe1feba25efb00802fa127042b54101c8ec0a524c36464f5bb143d3b8b
+X-Bunq-Client-Request-Id: 57061b04b67ef
+X-Bunq-Geolocation: 0 0 0 0 NL
+X-Bunq-Language: en_US
+X-Bunq-Region: en_US
+
 {
     "amount": {
         "value": "12.50",
@@ -126,29 +118,26 @@ Here is how to create a signature in PHP. The signature will be passed by refere
 openssl_sign($dataToSign, $signature, $privateKey, OPENSSL_ALGO_SHA256);
 ```
 
-Encode the resulting `$signature` using Base64 and add the resulting value under the `X-Bunq-Client-Signature` header. 
+Encode the resulting `$signature` using Base64 and add the resulting value under the `X-Bunq-Client-Signature` header.  It will look something like this: `UINaaJELGHekiye4JExGx6TCs2lKMta74oVlZlwVNuVD6xPpH7RS6H58C21MmiQ75`
 
 You have signed your request! Send it!  
 
 
 ## Response verifying example
 
-We sent the request and have received this response:
-
-| Header | Value |
-| :--- | :--- |
-| Access-Control-Allow-Origin: | \* |
-| Content-Type: | application/json |
-| Date: | Thu, 07 Apr 2016 08:32:04 GMT |
-| Server: | APACHE |
-| Strict-Transport-Security: | max-age=31536000 |
-| Transfer-Encoding: | chunked |
-| X-Bunq-Client-Response-Id: | 89dcaa5c-fa55-4068-9822-3f87985d2268 |
-| X-Bunq-Client-Request-Id: | 57061b04b67ef |
-| X-Bunq-Server-Signature: | ee9sDfzEhQ2L6Rquyh2XmJyNWdSBOBo6Z2eUYuM4bAOBCn9N5vjs6k6RROpagxXFXdGI9sT15tYCaLe5FS9aciIuJmrVW/SZCDWq/nOvSThi7+BwD9JFdG7zfR4afC8qfVABmjuMrtjaUFSrthyHS/5wEuDuax9qUZn6sVXcgZEq49hy4yHrV8257I4sSQIHRmgds4BXcGhPp266Z6pxjzAJbfyzt5JgJ8/suxgKvm/nYhnOfsgIIYCgcyh4DRrQltohiSon6x1ZsRIfQnCDlDDghaIxbryLfinT5Y4eU1eiCkFB4D69S4HbFXYyAxlqtX2W6Tvax6rIM2MMPNOh4Q== |
-| X-Frame-Options: | SAMEORIGIN |
+We sent the request and have received this response with code `200`:
 
 ```text
+access-control-allow-origin: *
+content-type: application/json
+date: Thu, 07 Apr 2016 08:32:04 GMT
+server: APACHE
+strict-transport-security: max-age=31536000
+transfer-encoding: chunked
+x-bunq-client-response-id: 89dcaa5c-fa55-4068-9822-3f87985d2268
+x-bunq-client-request-id: 57061b04b67ef
+x-bunq-server-signature: ee9sDfzEhQ2L6Rquyh2XmJyNWdSBOBo6Z2eUYuM4bAOBCn9N5vjs6k6RROpagxXFXdGI9sT15tYCaLe5FS9aciIuJmrVW/SZCDWq/nOvSThi7+BwD9JFdG7zfR4afC8qfVABmjuMrtjaUFSrthyHS/5wEuDuax9qUZn6sVXcgZEq49hy4yHrV8257I4sSQIHRmgds4BXcGhPp266Z6pxjzAJbfyzt5JgJ8/suxgKvm/nYhnOfsgIIYCgcyh4DRrQltohiSon6x1ZsRIfQnCDlDDghaIxbryLfinT5Y4eU1eiCkFB4D69S4HbFXYyAxlqtX2W6Tvax6rIM2MMPNOh4Q==
+x-frame-options: SAMEORIGIN
 {
     "Response": [
         {
@@ -162,23 +151,30 @@ We sent the request and have received this response:
 
 We need to verify that this response was sent by the bunq server and not from a man-in-the-middle. 
 
-So, first we built the data that is to be verified, starting with the response code \(200\). Follow this by a list of the bunq headers \(sorted alphabetically and excluding the signature header itself\). 
+* [ ] Create a `$dataToSign` variable starting with the response code \(`200`\). 
+* [ ] On a new line follow that by a list of alphabetically-sorted headers only including headers starting with `X-Bunq-`. Convert to 
 
-Note: 
+  `X-Header-Capitalization-Style` from  `x-header-non-capitalization-style` if needed.
 
-* [ ] Only include headers starting with `X-Bunq-`. 
-* [ ] Add two line feeds followed by the response body. 
+* [ ] Add an extra \(so double\) linefeed after the list of headers. 
+* [ ] End with the body of the request.
 
-{% hint style="info" %}
-The headers might change in transit from `X-Header-Capitalization-Style` to `x-header-non-capitalization-style`. Make sure you change them to `X-Header-Capitalization-Style` before verifying the response signature.
-{% endhint %}
+So for our example above the response to sign will look like this:
 
 ```text
 200
 X-Bunq-Client-Request-Id: 57061b04b67ef
 X-Bunq-Server-Response-Id: 89dcaa5c-fa55-4068-9822-3f87985d2268
 
-{"Response":[{"Id":{"id":1561}}]}
+{
+    "Response": [
+        {
+            "Id": {
+                "id": 1561
+            }
+        }
+    ]
+}
 ```
 
 * [ ] Verify the signature of `$dataToVerify` using the SHA256 algorithm and the `$publicKey` of the server. 
